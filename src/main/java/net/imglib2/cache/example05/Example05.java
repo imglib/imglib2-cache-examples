@@ -164,7 +164,6 @@ public class Example05
 		final long[] dimensions = new long[] { 640, 640, 640 };
 
 		final UnsignedShortType type = new UnsignedShortType();
-		final VolatileUnsignedShortType vtype = new VolatileUnsignedShortType();
 
 		final CellGrid grid = new CellGrid( dimensions, cellDimensions );
 		final Path blockcache = DiskCellCache.createTempDirectory( "CellImg-", true );
