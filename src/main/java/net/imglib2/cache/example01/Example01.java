@@ -15,6 +15,7 @@ import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.img.Img;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.transform.Round;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.view.Views;
@@ -28,8 +29,9 @@ public class Example01
 		final Img< ARGBType > img = new DiskCachedCellImgFactory< ARGBType >()
 				.create( dimensions, new ARGBType() );
 
-		final Bdv bdv = BdvFunctions.show( img, "DiskCachedCellImg" );
+		ImageJFunctions.show( img );
 
+		final Bdv bdv = BdvFunctions.show( img, "Example01" );
 
 		/*
 		 * Install behaviour for painting into img with shortcut "D"
