@@ -1,8 +1,6 @@
 package net.imglib2.cache.example02;
 
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.basictypeaccess.array.DirtyIntArray;
@@ -13,10 +11,6 @@ import net.imglib2.util.Intervals;
 public class CheckerboardLoader implements CacheLoader< Long, Cell< DirtyIntArray > >
 {
 	private final CellGrid grid;
-
-	ConcurrentHashMap< Long, AtomicInteger > loadcounts = new ConcurrentHashMap<>();
-
-	AtomicInteger loadcount = new AtomicInteger( 0 );
 
 	public CheckerboardLoader( final CellGrid grid )
 	{
