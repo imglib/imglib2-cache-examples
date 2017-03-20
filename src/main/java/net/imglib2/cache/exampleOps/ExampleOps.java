@@ -107,7 +107,7 @@ public class ExampleOps
 		 * @param source
 		 */
 		public OpLoader( final CellGrid grid,  final RandomAccessible< UnsignedShortType > source,
-				OpService service,
+				OpService opService,
 				Class< ? extends Op > opClass, Object[] args )
 		{
 			this.source = source;
@@ -130,7 +130,7 @@ public class ExampleOps
 			// be preferable to use classes.  Will look into this
 			IntervalView<UnsignedShortType> output = Views.translate( img, cellMin);
 			this.op = Computers.unary( 
-				service, opClass, 
+				opService, opClass,
 				Views.interval( source, output ), output, args ); 
 		}
 
