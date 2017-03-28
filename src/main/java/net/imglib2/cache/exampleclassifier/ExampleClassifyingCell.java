@@ -37,8 +37,6 @@ import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.CreateInvalid;
 import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.cache.volatiles.VolatileCache;
-import net.imglib2.converter.Converter;
-import net.imglib2.converter.Converters;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.DirtyShortArray;
@@ -46,7 +44,6 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.LazyCellImg;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
@@ -213,8 +210,8 @@ public class ExampleClassifyingCell
 		final ThresholdingClassifier classifier = new ThresholdingClassifier( 0.5 );
 		final Pair< Img< UnsignedShortType >, Img< VolatileUnsignedShortType > > prediction = createClassifier( Arrays.asList( img ), classifier, 2, grid, queue );
 
-		final Converter< VolatileUnsignedShortType, ARGBType > converter = ( s, t ) -> t.set( s.get().get() == 0 ? 255 << 16 | 255 << 8 : 255 );
+		BdvFunctions.show( prediction.getB(), "Prediction", BdvOptions.options().addTo( bdv ) );
+		bdv.getBdvHandle().getSetupAssignments().getMinMaxGroups().get( 1 ).setRange( 0, 1 );
 
-		BdvFunctions.show( Converters.convert( ( RandomAccessibleInterval< VolatileUnsignedShortType > ) prediction.getB(), converter, new ARGBType() ), "Prediction", BdvOptions.options().addTo( bdv ) );
 	}
 }
