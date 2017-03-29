@@ -7,21 +7,16 @@ import static net.imglib2.cache.img.PrimitiveType.SHORT;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.IntStream;
 
 import bdv.img.cache.CreateInvalidVolatileCell;
 import bdv.img.cache.VolatileCachedCellImg;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
-import net.imglib2.Cursor;
-import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
@@ -38,7 +33,6 @@ import net.imglib2.cache.volatiles.CreateInvalid;
 import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.cache.volatiles.VolatileCache;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.DirtyShortArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.Cell;
@@ -49,11 +43,8 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Pair;
-import net.imglib2.util.Util;
 import net.imglib2.util.ValuePair;
-import net.imglib2.view.Views;
 import weka.classifiers.Classifier;
-import weka.core.Instance;
 
 public class ExampleClassifyingCell
 {
@@ -90,59 +81,6 @@ public class ExampleClassifyingCell
 		}
 	}
 
-	public static class ClassifyingCellLoader< T extends RealType< T > > implements CacheLoader< Long, Cell< VolatileShortArray > >
-	{
-		private final CellGrid grid;
-
-		private final List< RandomAccessible< T > > features;
-
-		private final Classifier classifier;
-
-		private final int numClasses;
-
-		public ClassifyingCellLoader(
-				final CellGrid grid,
-				final List< RandomAccessible< T > > features,
-				final Classifier classifier,
-				final int numClasses )
-		{
-			this.grid = grid;
-			this.features = features;
-			this.classifier = classifier;
-			this.numClasses = numClasses;
-		}
-
-		@Override
-		public Cell< VolatileShortArray > get( final Long key ) throws Exception
-		{
-			final long index = key;
-
-			final int n = grid.numDimensions();
-			final long[] cellMin = new long[ n ];
-			final int[] cellDims = new int[ n ];
-			grid.getCellDimensions( index, cellMin, cellDims );
-			final long[] cellMax = IntStream.range( 0, n ).mapToLong( d -> cellMin[ d ] + cellDims[ d ] - 1 ).toArray();
-			final FinalInterval cellInterval = new FinalInterval( cellMin, cellMax );
-
-			final int blocksize = ( int ) Intervals.numElements( cellDims );
-			final VolatileShortArray array = new VolatileShortArray( blocksize, true );
-
-			final Img< UnsignedShortType > img = ArrayImgs.unsignedShorts( array.getCurrentStorageArray(), Util.int2long( cellDims ) );
-			final ArrayList< RandomAccessibleInterval< T > > featureBlocks = new ArrayList<>();
-			for ( final RandomAccessible< T > f : this.features )
-				featureBlocks.add( Views.interval( f, cellInterval ) );
-
-			final InstanceView< T > instances = new InstanceView<>( Views.collapseReal( Views.stack( featureBlocks ) ), InstanceView.makeDefaultAttributes( features.size(), numClasses ) );
-
-			final Cursor< Instance > instancesCursor = Views.interval( instances, cellInterval ).cursor();
-			final Cursor< UnsignedShortType > imgCursor = img.cursor();
-			while ( imgCursor.hasNext() )
-				imgCursor.next().set( 1 - ( int ) classifier.classifyInstance( instancesCursor.next() ) );
-
-			return new Cell<>( cellDims, cellMin, array );
-		}
-	}
-
 	static < T extends RealType< T > > Pair< Img< UnsignedShortType >, Img< VolatileUnsignedShortType > >
 	createClassifier( final List< RandomAccessible< T > > source, final Classifier classifier, final int numClasses, final CellGrid grid, final BlockingFetchQueues< Callable< ? > > queue )
 			throws IOException
@@ -154,7 +92,7 @@ public class ExampleClassifyingCell
 		final DiskCellCache< VolatileShortArray > diskcache = new DiskCellCache<>(
 				blockcache,
 				grid,
-				new ClassifyingCellLoader<>( grid, source, classifier, numClasses ),
+				new ClassifyingCellLoaderOnList<>( grid, source, classifier, numClasses ),
 				AccessIo.get( SHORT, VOLATILE ),
 				type.getEntitiesPerPixel() );
 		final IoSync< Long, Cell< VolatileShortArray > > iosync = new IoSync<>( diskcache );
