@@ -11,10 +11,10 @@ import java.util.function.LongFunction;
 import org.apache.commons.io.IOUtils;
 
 import net.imglib2.Interval;
-import net.imglib2.cache.examplehttp.FunctorLoader.Functor;
+import net.imglib2.cache.CacheLoader;
 import net.imglib2.util.Intervals;
 
-public class HTTPLoader< A > implements Functor< Interval, A >
+public class HTTPLoader< A > implements CacheLoader< Interval, A >
 {
 
 	public static final String GET = "GET";
@@ -38,7 +38,7 @@ public class HTTPLoader< A > implements Functor< Interval, A >
 	}
 
 	@Override
-	public A call( final Interval interval ) throws IOException
+	public A get( final Interval interval ) throws IOException
 	{
 		final String address = addressComposer.apply( interval );
 		final URL url = new URL( address );

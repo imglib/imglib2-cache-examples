@@ -18,6 +18,7 @@ import bdv.viewer.DisplayMode;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.cache.Cache;
+import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
 import net.imglib2.cache.img.AccessIo;
 import net.imglib2.cache.img.DiskCellCache;
@@ -63,7 +64,7 @@ public class ExampleHTTP
 	createFunctorLoadedImgs(
 			final CellGrid grid,
 			final BlockingFetchQueues< Callable< ? > > queue,
-			final FunctorLoader< A > loader,
+			final IntervalKeyLoaderAsLongKeyLoader< A > loader,
 			final T type,
 			final VT vtype,
 			final PrimitiveType primitiveType )
@@ -133,11 +134,11 @@ public class ExampleHTTP
 		};
 		final BiConsumer< byte[], VolatileByteArray > copier = ( bytes, access ) -> System.arraycopy( bytes, 0, access.getCurrentStorageArray(), 0, bytes.length );
 		final HTTPLoader< VolatileByteArray > functor = new HTTPLoader<>( addressComposer, ( n ) -> new VolatileByteArray( ( int ) n, true ), copier );
-		final FunctorLoader< VolatileByteArray > loader = new FunctorLoader<>( grid, functor );
+		final IntervalKeyLoaderAsLongKeyLoader< VolatileByteArray > loader = new IntervalKeyLoaderAsLongKeyLoader<>( grid, functor );
 		final Pair< Img< UnsignedByteType >, Img< VolatileUnsignedByteType > > httpImgs =
 				createFunctorLoadedImgs( grid, queue, loader, new UnsignedByteType(), new VolatileUnsignedByteType(), PrimitiveType.BYTE );
 
-		final FunctorLoader.Functor< Interval, VolatileFloatArray > gradientFunctor = interval -> {
+		final CacheLoader< Interval, VolatileFloatArray > gradientFunctor = interval -> {
 			final ExtendedRandomAccessibleInterval< UnsignedByteType, Img< UnsignedByteType > > source = Views.extendBorder( httpImgs.getA() );
 			final long numElements = Intervals.numElements( interval );
 			final VolatileFloatArray store = new VolatileFloatArray( ( int ) numElements, true );
@@ -164,7 +165,7 @@ public class ExampleHTTP
 
 			return store;
 		};
-		final FunctorLoader< VolatileFloatArray > gradientLoader = new FunctorLoader<>( grid, gradientFunctor );
+		final IntervalKeyLoaderAsLongKeyLoader< VolatileFloatArray > gradientLoader = new IntervalKeyLoaderAsLongKeyLoader<>( grid, gradientFunctor );
 		final Pair< Img< FloatType >, Img< VolatileFloatType > > gradientImgs =
 				createFunctorLoadedImgs( grid, queue, gradientLoader, new FloatType(), new VolatileFloatType(), PrimitiveType.FLOAT );
 
