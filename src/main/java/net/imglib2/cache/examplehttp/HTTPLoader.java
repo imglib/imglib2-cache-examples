@@ -1,6 +1,5 @@
 package net.imglib2.cache.examplehttp;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.function.BiConsumer;
@@ -10,10 +9,9 @@ import java.util.function.LongFunction;
 import org.apache.commons.io.IOUtils;
 
 import net.imglib2.Interval;
-import net.imglib2.cache.CacheLoader;
 import net.imglib2.util.Intervals;
 
-public class HTTPLoader< A > implements CacheLoader< Interval, A >
+public class HTTPLoader< A > implements Function< Interval, A >
 {
 
 	private final Function< Interval, String > addressComposer;
@@ -34,19 +32,25 @@ public class HTTPLoader< A > implements CacheLoader< Interval, A >
 	}
 
 	@Override
-	public A get( final Interval interval ) throws IOException
+	public A apply( final Interval interval )
 	{
-		final String address = addressComposer.apply( interval );
-		final URL url = new URL( address );
-		final InputStream stream = url.openStream();
-		final long numElements = Intervals.numElements( interval );
-		final byte[] response = IOUtils.toByteArray( stream );
-//		System.out.println( response.length + " " + numElements + " " + bytesPerPixel );
+		try
+		{
+			final String address = addressComposer.apply( interval );
+			final URL url = new URL( address );
+			final InputStream stream = url.openStream();
+			final long numElements = Intervals.numElements( interval );
+			final byte[] response = IOUtils.toByteArray( stream );
 
-		final A access = accessFactory.apply(numElements );
-		copyToAccess.accept(response, access );
+			final A access = accessFactory.apply(numElements );
+			copyToAccess.accept(response, access );
 
-		return access;
+			return access;
+		}
+		catch ( final Exception e )
+		{
+			throw new RuntimeException( e );
+		}
 
 	}
 

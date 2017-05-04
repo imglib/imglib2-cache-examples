@@ -18,7 +18,6 @@ import bdv.viewer.DisplayMode;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.cache.Cache;
-import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
 import net.imglib2.cache.img.AccessIo;
 import net.imglib2.cache.img.DiskCellCache;
@@ -27,6 +26,7 @@ import net.imglib2.cache.queue.BlockingFetchQueues;
 import net.imglib2.cache.queue.FetcherThreads;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
 import net.imglib2.cache.ref.WeakRefVolatileCache;
+import net.imglib2.cache.util.IntervalKeyLoaderAsLongKeyLoader;
 import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.CreateInvalid;
 import net.imglib2.cache.volatiles.LoadingStrategy;
@@ -103,7 +103,7 @@ public class ExampleHTTP
 		final long[] offset = Arrays.stream( minPoint ).map( p -> p * 2 ).toArray();
 		final int[] cellDimensions = new int[] { 64, 64, 64 };
 //		final long[] dimensions = new long[] { 3584, 2944, 6912 }; // complete data set
-		final long[] dimensions = new long[] { 1000, 1000, 1000 };
+		final long[] dimensions = new long[] { 300, 300, 300 };
 		final CellGrid grid = new CellGrid( dimensions, cellDimensions );
 
 		final int numProc = Runtime.getRuntime().availableProcessors();
@@ -129,7 +129,6 @@ public class ExampleHTTP
 					offset[ 0 ] + interval.min( 0 ),
 					offset[ 1 ] + interval.min( 1 ),
 					offset[ 2 ] + interval.min( 2 ) );
-//			System.out.println( "Getting address: " + address );
 			return address;
 		};
 		final BiConsumer< byte[], VolatileByteArray > copier = ( bytes, access ) -> System.arraycopy( bytes, 0, access.getCurrentStorageArray(), 0, bytes.length );
@@ -138,7 +137,7 @@ public class ExampleHTTP
 		final Pair< Img< UnsignedByteType >, Img< VolatileUnsignedByteType > > httpImgs =
 				createFunctorLoadedImgs( grid, queue, loader, new UnsignedByteType(), new VolatileUnsignedByteType(), PrimitiveType.BYTE );
 
-		final CacheLoader< Interval, VolatileFloatArray > gradientFunctor = interval -> {
+		final Function< Interval, VolatileFloatArray > gradientFunctor = interval -> {
 			final ExtendedRandomAccessibleInterval< UnsignedByteType, Img< UnsignedByteType > > source = Views.extendBorder( httpImgs.getA() );
 			final long numElements = Intervals.numElements( interval );
 			final VolatileFloatArray store = new VolatileFloatArray( ( int ) numElements, true );
