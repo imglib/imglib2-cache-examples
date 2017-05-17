@@ -1,14 +1,11 @@
 package net.imglib2.cache.example02;
 
-import java.util.Arrays;
-
-import net.imglib2.cache.CacheLoader;
-import net.imglib2.img.basictypeaccess.array.DirtyIntArray;
-import net.imglib2.img.cell.Cell;
+import net.imglib2.cache.img.CellLoader;
+import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellGrid;
-import net.imglib2.util.Intervals;
+import net.imglib2.type.numeric.ARGBType;
 
-public class CheckerboardLoader implements CacheLoader< Long, Cell< DirtyIntArray > >
+public class CheckerboardLoader implements CellLoader< ARGBType >
 {
 	private final CellGrid grid;
 
@@ -18,25 +15,13 @@ public class CheckerboardLoader implements CacheLoader< Long, Cell< DirtyIntArra
 	}
 
 	@Override
-	public Cell< DirtyIntArray > get( final Long key ) throws Exception
+	public void load( final Img< ARGBType > cell ) throws Exception
 	{
-		final long index = key;
-
 		final int n = grid.numDimensions();
-		final long[] cellMin = new long[ n ];
-		final int[] cellDims = new int[ n ];
-		grid.getCellDimensions( index, cellMin, cellDims );
-		final int blocksize = ( int ) Intervals.numElements( cellDims );
-		final DirtyIntArray array = new DirtyIntArray( blocksize );
-
-		final long[] cellGridPosition = new long[ n ];
-		grid.getCellGridPositionFlat( index, cellGridPosition );
 		long sum = 0;
 		for ( int d = 0; d < n; ++d )
-			sum += cellGridPosition[ d ];
+			sum += cell.min( d ) / grid.cellDimension( d );
 		final int color = ( sum % 2 == 0 ) ? 0xff000000 : 0xff008800;
-		Arrays.fill( array.getCurrentStorageArray(), color );
-
-		return new Cell<>( cellDims, cellMin, array );
+		cell.forEach( t -> t.set( color ) );
 	}
 }

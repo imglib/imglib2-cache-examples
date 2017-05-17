@@ -15,13 +15,11 @@ import net.imglib2.RandomAccess;
 import net.imglib2.RealPositionable;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
-import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.img.Img;
-import net.imglib2.img.basictypeaccess.array.DirtyIntArray;
-import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.transform.Round;
@@ -40,7 +38,7 @@ public class Example02
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 );
 
-		final CacheLoader< Long, Cell< DirtyIntArray > > loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
+		final CellLoader< ARGBType > loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
 
 		final Img< ARGBType > img = new DiskCachedCellImgFactory< ARGBType >( options ).create(
 				dimensions,
@@ -50,7 +48,6 @@ public class Example02
 		ImageJFunctions.show( img );
 
 		final Bdv bdv = BdvFunctions.show( img, "Example02" );
-
 
 		/*
 		 * Install behaviour for painting into img with shortcut "D"
