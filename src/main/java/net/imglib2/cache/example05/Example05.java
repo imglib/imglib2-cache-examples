@@ -15,6 +15,7 @@ import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
+import net.imglib2.cache.img.SingleCellArrayImg;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -32,7 +33,7 @@ public class Example05
 		}
 
 		@Override
-		public void load( final Img< UnsignedShortType > cell ) throws Exception
+		public void load( final SingleCellArrayImg< UnsignedShortType, ? > cell ) throws Exception
 		{
 			final int n = grid.numDimensions();
 			long sum = 0;

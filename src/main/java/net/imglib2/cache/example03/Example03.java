@@ -5,6 +5,7 @@ import static net.imglib2.cache.img.PrimitiveType.SHORT;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
@@ -17,6 +18,7 @@ import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DirtyDiskCellCache;
 import net.imglib2.cache.img.DiskCellCache;
 import net.imglib2.cache.img.LoadedCellCacheLoader;
+import net.imglib2.cache.img.SingleCellArrayImg;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.array.DirtyShortArray;
@@ -37,7 +39,7 @@ public class Example03
 		}
 
 		@Override
-		public void load( final Img< UnsignedShortType > cell ) throws Exception
+		public void load( final SingleCellArrayImg< UnsignedShortType, ? > cell ) throws Exception
 		{
 			final int n = grid.numDimensions();
 			long sum = 0;
@@ -51,17 +53,10 @@ public class Example03
 			 * The following alternative version extracts and directly writes to
 			 * the underlying primitive array.
 			 *
-			 * This assumes that:
-			 *
-			 * 1.) cell is a NativeImg.
-			 *
-			 * 2.) the access is backed by a primitive array.
-			 *
-			 * Both is true if a LoadedCellCacheLoader is used.
+			 * This assumes that the access is backed by a primitive array which
+			 * is true if a LoadedCellCacheLoader is used.
 			 */
-//			@SuppressWarnings( "unchecked" )
-//			final short[] data = ( short[] ) ( ( NativeImg< UnsignedShortType, ? extends ArrayDataAccess< ? > > ) cell ).update( null ).getCurrentStorageArray();
-//			Arrays.fill( data, color );
+			Arrays.fill( ( short[] ) cell.getStorageArray(), color );
 		}
 	}
 
