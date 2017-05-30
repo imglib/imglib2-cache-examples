@@ -59,22 +59,17 @@ public class ExampleOps
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 );
-
-		final DiskCachedCellImgOptions writeFastOptions = options()
-				.cellDimensions( cellDimensions )
-				.cacheType( CacheType.BOUNDED )
-				.maxCacheSize( 100 )
-				.dirtyAccesses( false );
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( writeOnlyDirtyOptions );
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = new DiskCachedCellImgFactory< UnsignedShortType >( writeOnlyDirtyOptions )
-				.create( dimensions, type, loader );
+		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
-		final Img< UnsignedShortType > erode = new DiskCachedCellImgFactory< UnsignedShortType >( writeFastOptions )
-				.create( dimensions, type, cell -> ij.op().morphology().erode( cell, img, new RectangleShape( 3, false ) ) );
+		final Img< UnsignedShortType > erode = factory.create( dimensions, type,
+				cell -> ij.op().morphology().erode( cell, img, new RectangleShape( 3, false ) ),
+				options().initializeCellsAsDirty( true ) );
 
 		BdvFunctions.show( VolatileViews.wrapAsVolatile( erode ), "Feature", BdvOptions.options().addTo( bdv ) );
 	}

@@ -53,27 +53,22 @@ public class Example05
 		final long[] dimensions = new long[] { 640, 640, 640 };
 
 		final UnsignedShortType type = new UnsignedShortType();
-
-		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = new DiskCachedCellImgFactory< UnsignedShortType >( options()
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( options()
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
-				.maxCacheSize( 100 ) )
-						.create( dimensions, new UnsignedShortType(), loader );
+				.maxCacheSize( 100 ) );
+
+		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
+		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
 
-		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( options()
-				.cellDimensions( cellDimensions )
-				.cacheType( CacheType.BOUNDED )
-				.maxCacheSize( 100 )
-				.dirtyAccesses( false ) );
 		final RandomAccessible< UnsignedShortType > source = Views.extendBorder( img );
 		final double[] sigma1 = new double[] { 5, 5, 5 };
 		final double[] sigma2 = new double[] { 4, 4, 4 };
-		final Img< UnsignedShortType > gauss1 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma1, source, cell, 1 ) );
-		final Img< UnsignedShortType > gauss2 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma2, source, cell, 1 ) );
+		final Img< UnsignedShortType > gauss1 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma1, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
+		final Img< UnsignedShortType > gauss2 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma2, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
 
 //		BdvFunctions.show( gauss1, "Gauss 1", BdvOptions.options().addTo( bdv ) );
 //		BdvFunctions.show( gauss2, "Gauss 2", BdvOptions.options().addTo( bdv ) );

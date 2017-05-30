@@ -16,7 +16,6 @@ import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.cache.img.SingleCellArrayImg;
 import net.imglib2.img.Img;
@@ -87,27 +86,21 @@ public class ExampleClassifyingCell
 
 		final UnsignedShortType type = new UnsignedShortType();
 
-		final DiskCachedCellImgOptions writeOnlyDirtyOptions = options()
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory< UnsignedShortType >( options()
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
-				.maxCacheSize( 100 );
-
-		final DiskCachedCellImgOptions writeFastOptions = options()
-				.cellDimensions( cellDimensions )
-				.cacheType( CacheType.BOUNDED )
-				.maxCacheSize( 100 )
-				.dirtyAccesses( false );
+				.maxCacheSize( 100 ) );
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = new DiskCachedCellImgFactory< UnsignedShortType >( writeOnlyDirtyOptions )
-				.create( dimensions, type, loader );
+		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
 		final ThresholdingClassifier classifier = new ThresholdingClassifier( 0.5 );
-		final Img< UnsignedShortType > prediction = new DiskCachedCellImgFactory< UnsignedShortType >( writeFastOptions )
-				.create( dimensions, type, new ClassifyingCellLoader<>( Arrays.asList( img ), classifier, 2 ) );
+		final Img< UnsignedShortType > prediction = factory.create( dimensions, type,
+				new ClassifyingCellLoader<>( Arrays.asList( img ), classifier, 2 ),
+				options().initializeCellsAsDirty( true ) );
 
 		final SharedQueue queue = new SharedQueue( 7 );
 		BdvFunctions.show( VolatileViews.wrapAsVolatile( prediction, queue ), "Prediction", BdvOptions.options().addTo( bdv ) );

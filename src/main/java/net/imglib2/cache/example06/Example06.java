@@ -58,40 +58,33 @@ public class Example06
 		final UnsignedShortType type = new UnsignedShortType();
 		final ShortType stype = new ShortType();
 
-		final DiskCachedCellImgOptions writeOnlyDirtyOptions = options()
+		final DiskCachedCellImgOptions factoryOptions = options()
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 );
-
-		final DiskCachedCellImgOptions writeFastOptions = options()
-				.cellDimensions( cellDimensions )
-				.cacheType( CacheType.BOUNDED )
-				.maxCacheSize( 100 )
-				.dirtyAccesses( false );
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( factoryOptions );
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = new DiskCachedCellImgFactory< UnsignedShortType >( writeOnlyDirtyOptions )
-				.create( dimensions, type, loader );
+		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
-		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( writeFastOptions );
 		final RandomAccessible< UnsignedShortType > source = Views.extendBorder( img );
 		final double[] sigma1 = new double[] { 5, 5, 5 };
 		final double[] sigma2 = new double[] { 4, 4, 4 };
-		final Img< UnsignedShortType > gauss1 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma1, source, cell, 1 ) );
-		final Img< UnsignedShortType > gauss2 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma2, source, cell, 1 ) );
+		final Img< UnsignedShortType > gauss1 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma1, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
+		final Img< UnsignedShortType > gauss2 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma2, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
 
-		final DiskCachedCellImgFactory< ShortType > sfactory = new DiskCachedCellImgFactory<>( writeFastOptions );
+		final DiskCachedCellImgFactory< ShortType > sfactory = new DiskCachedCellImgFactory<>( factoryOptions );
 //		final Img< ShortType > diff = sfactory.create( dimensions, stype, cell -> Views.interval( Views.pair( cell, Views.pair( gauss1, gauss2 ) ), cell ).forEach( a -> a.getA().set( ( short ) ( a.getB().getA().get() - a.getB().getB().get() + 65535 / 4 ) ) ) );
 		final Img< ShortType > diff = sfactory.create( dimensions, stype, cell -> {
 			final Cursor< UnsignedShortType > in1 = Views.flatIterable( Views.interval( gauss1, cell ) ).cursor();
 			final Cursor< UnsignedShortType > in2 = Views.flatIterable( Views.interval( gauss2, cell ) ).cursor();
 			final Cursor< ShortType > out = Views.flatIterable( cell ).cursor();
-			while( out.hasNext() )
+			while ( out.hasNext() )
 				out.next().set( ( short ) ( in1.next().get() - in2.next().get() + 65535 / 4 ) );
-		} );
+		}, options().initializeCellsAsDirty( true ) );
 
 		final SharedQueue queue = new SharedQueue( 7 );
 		BdvFunctions.show( VolatileViews.wrapAsVolatile( gauss1, queue ), "Gauss 1", BdvOptions.options().addTo( bdv ) );

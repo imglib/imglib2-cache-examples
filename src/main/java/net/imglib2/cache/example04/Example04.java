@@ -81,7 +81,7 @@ public class Example04
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 )
-				.dirtyAccesses( false ) )
+				.initializeCellsAsDirty( true ) )
 						.create( dimensions, new UnsignedShortType(), loader2 );
 
 		BdvFunctions.show( img2, "Gauss", BdvOptions.options().addTo( bdv ) );

@@ -41,5 +41,4 @@ public class ThresholdingClassifier implements Classifier
 		// don't need this
 		return null;
 	}
-
 }
