@@ -134,8 +134,8 @@ Jean-Yves Tinevez and Michael Zinsmaier.</license.copyrightOwners>
 		</dependency>
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
-			<artifactId>weka-stable</artifactId>
-			<version>3.8.0</version>
+			<artifactId>weka-dev</artifactId>
+			<version>3.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
