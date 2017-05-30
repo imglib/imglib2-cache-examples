@@ -1,102 +1,44 @@
 package net.imglib2.cache.examplehttp;
 
-import static net.imglib2.cache.img.AccessFlags.VOLATILE;
+import static bdv.viewer.DisplayMode.SINGLE;
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import bdv.img.cache.CreateInvalidVolatileCell;
-import bdv.img.cache.VolatileCachedCellImg;
+import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
-import bdv.util.BdvStackSource;
-import bdv.viewer.DisplayMode;
+import bdv.util.BdvSource;
+import bdv.util.volatiles.SharedQueue;
+import bdv.util.volatiles.VolatileViews;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
+import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.gradient.PartialDerivative;
-import net.imglib2.cache.Cache;
-import net.imglib2.cache.IoSync;
-import net.imglib2.cache.img.AccessIo;
-import net.imglib2.cache.img.DiskCellCache;
-import net.imglib2.cache.img.PrimitiveType;
-import net.imglib2.cache.queue.BlockingFetchQueues;
-import net.imglib2.cache.queue.FetcherThreads;
-import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
-import net.imglib2.cache.ref.WeakRefVolatileCache;
+import net.imglib2.cache.img.CellLoader;
+import net.imglib2.cache.img.DiskCachedCellImgFactory;
+import net.imglib2.cache.img.DiskCachedCellImgOptions;
+import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
+import net.imglib2.cache.img.SingleCellArrayImg;
 import net.imglib2.cache.util.IntervalKeyLoaderAsLongKeyLoader;
-import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.CreateInvalid;
-import net.imglib2.cache.volatiles.LoadingStrategy;
-import net.imglib2.cache.volatiles.VolatileCache;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.basictypeaccess.array.FloatArray;
-import net.imglib2.img.basictypeaccess.volatiles.VolatileArrayDataAccess;
-import net.imglib2.img.basictypeaccess.volatiles.array.VolatileByteArray;
-import net.imglib2.img.basictypeaccess.volatiles.array.VolatileFloatArray;
-import net.imglib2.img.cell.Cell;
+import net.imglib2.img.basictypeaccess.volatiles.array.DirtyVolatileByteArray;
 import net.imglib2.img.cell.CellGrid;
-import net.imglib2.img.cell.LazyCellImg;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.type.volatiles.AbstractVolatileNativeRealType;
-import net.imglib2.type.volatiles.VolatileFloatType;
-import net.imglib2.type.volatiles.VolatileUnsignedByteType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Pair;
-import net.imglib2.util.ValuePair;
-import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 public class ExampleHTTP
 {
-
-	static < T extends RealType< T > & NativeType< T >, VT extends AbstractVolatileNativeRealType< T, VT >, A extends VolatileArrayDataAccess< A > >
-	Pair< Img< T >, Img< VT > >
-	createFunctorLoadedImgs(
-			final CellGrid grid,
-			final BlockingFetchQueues< Callable< ? > > queue,
-			final IntervalKeyLoaderAsLongKeyLoader< A > loader,
-			final T type,
-			final VT vtype,
-			final PrimitiveType primitiveType )
-					throws IOException
-	{
-
-		final Path blockcache = DiskCellCache.createTempDirectory( "HTTP-", true );
-
-		final DiskCellCache< A > diskcache = new DiskCellCache<>(
-				blockcache,
-				grid,
-				loader,
-				AccessIo.get( primitiveType, VOLATILE ),
-				type.getEntitiesPerPixel() );
-		final IoSync< Long, Cell< A > > iosync = new IoSync<>( diskcache );
-		final Cache< Long, Cell< A > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< A > >( 1000 )
-				.withRemover( iosync )
-				.withLoader( iosync );
-		final LazyCellImg< T, A > http = new LazyCellImg<>( grid, type, cache.unchecked()::get );
-
-		final CreateInvalid< Long, Cell< A > > createInvalid = CreateInvalidVolatileCell.get( grid, type );
-		final VolatileCache< Long, Cell< A > > volatileCache = new WeakRefVolatileCache<>( cache, queue, createInvalid );
-
-		final CacheHints hints = new CacheHints( LoadingStrategy.VOLATILE, 0, false );
-		final VolatileCachedCellImg< VT, A > vhttp = new VolatileCachedCellImg<>( grid, vtype, hints, volatileCache.unchecked()::get );
-
-		return new ValuePair<>( http, vhttp );
-	}
-
 	public static void main( final String[] args ) throws IOException
 	{
-
 		// http://emdata.janelia.org/api/node/822524777d3048b8bd520043f90c1d28/grayscale/metadata
 		final long[] minPoint = { 1728, 1536, 1344 };
 //		final long offset = minPoint;
@@ -106,11 +48,6 @@ public class ExampleHTTP
 		final long[] dimensions = new long[] { 300, 300, 300 };
 		final CellGrid grid = new CellGrid( dimensions, cellDimensions );
 
-		final int numProc = Runtime.getRuntime().availableProcessors();
-		final int maxNumLevels = 1;
-		final int numFetcherThreads = numProc - 1;
-		final BlockingFetchQueues< Callable< ? > > queue = new BlockingFetchQueues<>( maxNumLevels );
-		new FetcherThreads( queue, numFetcherThreads );
 
 		// GET <api URL>/node/<UUID>/<data
 		// name>/isotropic/<dims>/<size>/<offset>[/<format>][?queryopts]
@@ -131,48 +68,62 @@ public class ExampleHTTP
 					offset[ 2 ] + interval.min( 2 ) );
 			return address;
 		};
-		final BiConsumer< byte[], VolatileByteArray > copier = ( bytes, access ) -> System.arraycopy( bytes, 0, access.getCurrentStorageArray(), 0, bytes.length );
-		final HTTPLoader< VolatileByteArray > functor = new HTTPLoader<>( addressComposer, ( n ) -> new VolatileByteArray( ( int ) n, true ), copier );
-		final IntervalKeyLoaderAsLongKeyLoader< VolatileByteArray > loader = new IntervalKeyLoaderAsLongKeyLoader<>( grid, functor );
-		final Pair< Img< UnsignedByteType >, Img< VolatileUnsignedByteType > > httpImgs =
-				createFunctorLoadedImgs( grid, queue, loader, new UnsignedByteType(), new VolatileUnsignedByteType(), PrimitiveType.BYTE );
-
-		final Function< Interval, VolatileFloatArray > gradientFunctor = interval -> {
-			final ExtendedRandomAccessibleInterval< UnsignedByteType, Img< UnsignedByteType > > source = Views.extendBorder( httpImgs.getA() );
-			final long numElements = Intervals.numElements( interval );
-			final VolatileFloatArray store = new VolatileFloatArray( ( int ) numElements, true );
-			final ArrayImg< FloatType, FloatArray > img = ArrayImgs.floats( store.getCurrentStorageArray(), Intervals.dimensionsAsLongArray( interval ) );
-			for ( int d = 0; d < 3; ++d ) {
-
-				final VolatileFloatArray storeDim = new VolatileFloatArray( ( int ) numElements, true );
-				final ArrayImg< FloatType, FloatArray > imgDim = ArrayImgs.floats( storeDim.getCurrentStorageArray(), Intervals.dimensionsAsLongArray( interval ) );
-				final long[] localOffset = Intervals.minAsLongArray( interval );
-				PartialDerivative.gradientCentralDifference2(
-						Converters.convert( source, new RealFloatConverter<>(), new FloatType() ),
-						Views.translate( imgDim, localOffset ), d );
-				final FloatType dummy = new FloatType();
-				for ( final Pair< FloatType, FloatType > p : Views.interval( Views.pair( imgDim, img ), img ) )
-				{
-					final float val = p.getA().get();
-					dummy.set( val * val );
-					p.getB().add( dummy );
-				}
-			}
-
-			for ( final FloatType pxl : img )
-				pxl.setReal( Math.sqrt( pxl.get() ) );
-
-			return store;
+		final BiConsumer< byte[], DirtyVolatileByteArray > copier = ( bytes, access ) ->
+		{
+			System.arraycopy( bytes, 0, access.getCurrentStorageArray(), 0, bytes.length );
+			access.setDirty();
 		};
-		final IntervalKeyLoaderAsLongKeyLoader< VolatileFloatArray > gradientLoader = new IntervalKeyLoaderAsLongKeyLoader<>( grid, gradientFunctor );
-		final Pair< Img< FloatType >, Img< VolatileFloatType > > gradientImgs =
-				createFunctorLoadedImgs( grid, queue, gradientLoader, new FloatType(), new VolatileFloatType(), PrimitiveType.FLOAT );
+		final HTTPLoader< DirtyVolatileByteArray > functor = new HTTPLoader<>( addressComposer, ( n ) -> new DirtyVolatileByteArray( ( int ) n, true ), copier );
+		final IntervalKeyLoaderAsLongKeyLoader< DirtyVolatileByteArray > loader = new IntervalKeyLoaderAsLongKeyLoader<>( grid, functor );
 
-		final BdvStackSource< VolatileUnsignedByteType > bdv = BdvFunctions.show( httpImgs.getB(), "dvid" );
-		bdv.getBdvHandle().getViewerPanel().setDisplayMode( DisplayMode.SINGLE );
-		BdvFunctions.show( gradientImgs.getB(), "gradient", BdvOptions.options().addTo( bdv ) );
-		bdv.getBdvHandle().getSetupAssignments().getMinMaxGroups().get( 0 ).setRange( 0.0, 255.0 );
-		bdv.getBdvHandle().getSetupAssignments().getMinMaxGroups().get( 1 ).setRange( 0.0, 30.0 );
+		final DiskCachedCellImgOptions factoryOptions = options()
+				.cacheType( CacheType.BOUNDED )
+				.maxCacheSize( 1000 )
+				.cellDimensions( cellDimensions );
 
+		final Img< UnsignedByteType > httpImg = new DiskCachedCellImgFactory< UnsignedByteType >( factoryOptions )
+				.createWithCacheLoader( dimensions, new UnsignedByteType(), loader );
+
+		final RandomAccessible< FloatType > source = Converters.convert( Views.extendBorder( httpImg ), new RealFloatConverter<>(), new FloatType() );
+		final CellLoader< FloatType > gradientLoader = new CellLoader< FloatType >()
+		{
+			@Override
+			public void load( final SingleCellArrayImg< FloatType, ? > cell ) throws Exception
+			{
+				final int n = cell.numDimensions();
+				for ( int d = 0; d < n; ++d )
+				{
+					final Img< FloatType > imgDim = ArrayImgs.floats( Intervals.dimensionsAsLongArray( cell ) );
+					PartialDerivative.gradientCentralDifference2( Views.offsetInterval( source, cell ), imgDim, d );
+					final Cursor< FloatType > c = imgDim.cursor();
+					for ( final FloatType t : cell )
+					{
+						final float val = c.next().get();
+						t.set( t.get() + val * val );
+					}
+				}
+				for ( final FloatType t : cell )
+					t.set( ( float ) Math.sqrt( t.get() ) );
+			}
+		};
+
+		final Img< FloatType > gradientImg = new DiskCachedCellImgFactory< FloatType >( factoryOptions )
+				.create( dimensions, new FloatType(), gradientLoader,
+						options().initializeCellsAsDirty( true ) );
+
+		final BdvSource httpSource = BdvFunctions.show(
+				VolatileViews.wrapAsVolatile( httpImg, new SharedQueue( 20 ) ),
+				"dvid" );
+
+		final int numProc = Runtime.getRuntime().availableProcessors();
+		final BdvSource gradientSource = BdvFunctions.show(
+				VolatileViews.wrapAsVolatile( gradientImg, new SharedQueue( numProc - 1 ) ),
+				"gradient",
+				BdvOptions.options().addTo( httpSource ) );
+
+		final Bdv bdv = httpSource;
+		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
+		httpSource.setDisplayRange( 0.0, 255.0 );
+		gradientSource.setDisplayRange( 0.0, 30.0 );
 	}
 }
