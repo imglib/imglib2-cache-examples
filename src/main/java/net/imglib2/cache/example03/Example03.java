@@ -83,7 +83,7 @@ public class Example03
 		final Cache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 100 )
 				.withRemover( iosync )
 				.withLoader( iosync );
-		final Img< UnsignedShortType > img = new CachedCellImg<>( grid, entitiesPerPixel, cache, new DirtyShortArray( 0 ) );
+		final Img< UnsignedShortType > img = new CachedCellImg<>( grid, type, cache, new DirtyShortArray( 0 ) );
 
 		/*
 		 * The above code is what happens under the hood when the following is
