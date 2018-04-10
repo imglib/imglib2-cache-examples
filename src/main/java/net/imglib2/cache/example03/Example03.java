@@ -1,7 +1,7 @@
 package net.imglib2.cache.example03;
 
-import static net.imglib2.cache.img.AccessFlags.DIRTY;
-import static net.imglib2.cache.img.PrimitiveType.SHORT;
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.type.PrimitiveType.SHORT;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,6 +21,7 @@ import net.imglib2.cache.img.LoadedCellCacheLoader;
 import net.imglib2.cache.img.SingleCellArrayImg;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
 import net.imglib2.img.Img;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.DirtyShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
@@ -72,12 +73,12 @@ public class Example03
 		final Path blockcache = DiskCellCache.createTempDirectory( "CellImg", true );
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
 		final CellLoader< UnsignedShortType > cellLoader = new CheckerboardLoader( grid );
-		final CacheLoader< Long, Cell< DirtyShortArray > > cacheLoader = LoadedCellCacheLoader.get( grid, cellLoader, type, DIRTY );
+		final CacheLoader< Long, Cell< DirtyShortArray > > cacheLoader = LoadedCellCacheLoader.get( grid, cellLoader, type, AccessFlags.setOf( DIRTY ) );
 		final DiskCellCache< DirtyShortArray > diskcache = new DirtyDiskCellCache<>(
 				blockcache,
 				grid,
 				cacheLoader,
-				AccessIo.get( SHORT, DIRTY ),
+				AccessIo.get( SHORT, AccessFlags.setOf( DIRTY ) ),
 				entitiesPerPixel );
 		final IoSync< Long, Cell< DirtyShortArray > > iosync = new IoSync<>( diskcache );
 		final Cache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 100 )

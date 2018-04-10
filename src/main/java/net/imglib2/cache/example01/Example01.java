@@ -26,8 +26,8 @@ public class Example01
 	{
 		final long[] dimensions = new long[] { 640, 640, 640 };
 
-		final Img< ARGBType > img = new DiskCachedCellImgFactory< ARGBType >()
-				.create( dimensions, new ARGBType() );
+		final Img< ARGBType > img = new DiskCachedCellImgFactory<>( new ARGBType() )
+				.create( dimensions );
 
 		ImageJFunctions.show( img );
 

@@ -40,9 +40,8 @@ public class Example02
 
 		final CellLoader< ARGBType > loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
 
-		final Img< ARGBType > img = new DiskCachedCellImgFactory< ARGBType >( options ).create(
+		final Img< ARGBType > img = new DiskCachedCellImgFactory<>( new ARGBType(), options ).create(
 				dimensions,
-				new ARGBType(),
 				loader );
 
 		ImageJFunctions.show( img );
