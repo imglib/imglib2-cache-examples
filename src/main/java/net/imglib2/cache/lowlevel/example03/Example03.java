@@ -1,7 +1,7 @@
 package net.imglib2.cache.lowlevel.example03;
 
-import static net.imglib2.cache.img.AccessFlags.DIRTY;
-import static net.imglib2.cache.img.PrimitiveType.SHORT;
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.type.PrimitiveType.SHORT;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,6 +17,7 @@ import net.imglib2.cache.img.DirtyDiskCellCache;
 import net.imglib2.cache.img.DiskCellCache;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
 import net.imglib2.img.Img;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.DirtyShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
@@ -75,7 +76,7 @@ public class Example03
 				blockcache,
 				grid,
 				new CheckerboardLoader( grid ),
-				AccessIo.get( SHORT, DIRTY ),
+				AccessIo.get( SHORT, AccessFlags.setOf( DIRTY ) ),
 				entitiesPerPixel );
 		final IoSync< Long, Cell< DirtyShortArray > > iosync = new IoSync<>( diskcache );
 		final UncheckedCache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 100 )

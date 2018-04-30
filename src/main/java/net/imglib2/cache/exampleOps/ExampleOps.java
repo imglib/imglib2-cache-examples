@@ -59,15 +59,15 @@ public class ExampleOps
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 );
-		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( writeOnlyDirtyOptions );
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( type, writeOnlyDirtyOptions );
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
+		final Img< UnsignedShortType > img = factory.create( dimensions, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
-		final Img< UnsignedShortType > erode = factory.create( dimensions, type,
+		final Img< UnsignedShortType > erode = factory.create( dimensions,
 				cell -> ij.op().morphology().erode( cell, img, new RectangleShape( 3, false ) ),
 				options().initializeCellsAsDirty( true ) );
 

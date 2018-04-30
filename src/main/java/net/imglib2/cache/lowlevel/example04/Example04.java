@@ -1,8 +1,8 @@
 package net.imglib2.cache.lowlevel.example04;
 
 import static bdv.viewer.DisplayMode.SINGLE;
-import static net.imglib2.cache.img.AccessFlags.DIRTY;
-import static net.imglib2.cache.img.PrimitiveType.SHORT;
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.type.PrimitiveType.SHORT;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,6 +22,7 @@ import net.imglib2.cache.img.DiskCellCache;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.DirtyShortArray;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.cell.Cell;
@@ -115,7 +116,7 @@ public class Example04
 				blockcache,
 				grid,
 				new CheckerboardLoader( grid ),
-				AccessIo.get( SHORT, DIRTY ),
+				AccessIo.get( SHORT, AccessFlags.setOf( DIRTY ) ),
 				entitiesPerPixel );
 		final IoSync< Long, Cell< DirtyShortArray > > iosync = new IoSync<>( diskcache );
 		final UncheckedCache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 100 )
@@ -132,7 +133,7 @@ public class Example04
 				blockcache2,
 				grid,
 				new GaussLoader( grid, Views.extendBorder( img ) ),
-				AccessIo.get( SHORT ),
+				AccessIo.get( SHORT, AccessFlags.setOf() ),
 				entitiesPerPixel );
 		final IoSync< Long, Cell< ShortArray > > iosync2 = new IoSync<>( diskcache2 );
 		final UncheckedCache< Long, Cell< ShortArray > > cache2 = new GuardedStrongRefLoaderRemoverCache< Long, Cell< ShortArray > >( 100 )

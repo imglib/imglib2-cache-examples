@@ -62,10 +62,10 @@ public class Example06
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 );
-		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( factoryOptions );
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( type, factoryOptions );
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
+		final Img< UnsignedShortType > img = factory.create( dimensions, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
@@ -73,12 +73,12 @@ public class Example06
 		final RandomAccessible< UnsignedShortType > source = Views.extendBorder( img );
 		final double[] sigma1 = new double[] { 5, 5, 5 };
 		final double[] sigma2 = new double[] { 4, 4, 4 };
-		final Img< UnsignedShortType > gauss1 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma1, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
-		final Img< UnsignedShortType > gauss2 = factory.create( dimensions, type, cell -> Gauss3.gauss( sigma2, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
+		final Img< UnsignedShortType > gauss1 = factory.create( dimensions, cell -> Gauss3.gauss( sigma1, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
+		final Img< UnsignedShortType > gauss2 = factory.create( dimensions, cell -> Gauss3.gauss( sigma2, source, cell, 1 ), options().initializeCellsAsDirty( true ) );
 
-		final DiskCachedCellImgFactory< ShortType > sfactory = new DiskCachedCellImgFactory<>( factoryOptions );
-//		final Img< ShortType > diff = sfactory.create( dimensions, stype, cell -> Views.interval( Views.pair( cell, Views.pair( gauss1, gauss2 ) ), cell ).forEach( a -> a.getA().set( ( short ) ( a.getB().getA().get() - a.getB().getB().get() + 65535 / 4 ) ) ) );
-		final Img< ShortType > diff = sfactory.create( dimensions, stype, cell -> {
+		final DiskCachedCellImgFactory< ShortType > sfactory = new DiskCachedCellImgFactory<>( stype, factoryOptions );
+//		final Img< ShortType > diff = sfactory.create( dimensions, cell -> Views.interval( Views.pair( cell, Views.pair( gauss1, gauss2 ) ), cell ).forEach( a -> a.getA().set( ( short ) ( a.getB().getA().get() - a.getB().getB().get() + 65535 / 4 ) ) ) );
+		final Img< ShortType > diff = sfactory.create( dimensions, cell -> {
 			final Cursor< UnsignedShortType > in1 = Views.flatIterable( Views.interval( gauss1, cell ) ).cursor();
 			final Cursor< UnsignedShortType > in2 = Views.flatIterable( Views.interval( gauss2, cell ) ).cursor();
 			final Cursor< ShortType > out = Views.flatIterable( cell ).cursor();

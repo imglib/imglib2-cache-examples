@@ -86,19 +86,19 @@ public class ExampleClassifyingCell
 
 		final UnsignedShortType type = new UnsignedShortType();
 
-		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory< UnsignedShortType >( options()
+		final DiskCachedCellImgFactory< UnsignedShortType > factory = new DiskCachedCellImgFactory<>( type, options()
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 ) );
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = factory.create( dimensions, type, loader );
+		final Img< UnsignedShortType > img = factory.create( dimensions, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
 		final ThresholdingClassifier classifier = new ThresholdingClassifier( 0.5 );
-		final Img< UnsignedShortType > prediction = factory.create( dimensions, type,
+		final Img< UnsignedShortType > prediction = factory.create( dimensions,
 				new ClassifyingCellLoader<>( Arrays.asList( img ), classifier, 2 ),
 				options().initializeCellsAsDirty( true ) );
 

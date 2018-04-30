@@ -81,8 +81,8 @@ public class ExampleHTTP
 				.maxCacheSize( 1000 )
 				.cellDimensions( cellDimensions );
 
-		final Img< UnsignedByteType > httpImg = new DiskCachedCellImgFactory< UnsignedByteType >( factoryOptions )
-				.createWithCacheLoader( dimensions, new UnsignedByteType(), loader );
+		final Img< UnsignedByteType > httpImg = new DiskCachedCellImgFactory<>( new UnsignedByteType(), factoryOptions )
+				.createWithCacheLoader( dimensions, loader );
 
 		final RandomAccessible< FloatType > source = Converters.convert( Views.extendBorder( httpImg ), new RealFloatConverter<>(), new FloatType() );
 		final CellLoader< FloatType > gradientLoader = new CellLoader< FloatType >()
@@ -107,8 +107,8 @@ public class ExampleHTTP
 			}
 		};
 
-		final Img< FloatType > gradientImg = new DiskCachedCellImgFactory< FloatType >( factoryOptions )
-				.create( dimensions, new FloatType(), gradientLoader,
+		final Img< FloatType > gradientImg = new DiskCachedCellImgFactory<>( new FloatType(), factoryOptions )
+				.create( dimensions, gradientLoader,
 						options().initializeCellsAsDirty( true ) );
 
 		final BdvSource httpSource = BdvFunctions.show(

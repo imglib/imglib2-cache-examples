@@ -67,22 +67,22 @@ public class Example04
 		final long[] dimensions = new long[] { 640, 640, 640 };
 
 		final CheckerboardLoader loader = new CheckerboardLoader( new CellGrid( dimensions, cellDimensions ) );
-		final Img< UnsignedShortType > img = new DiskCachedCellImgFactory< UnsignedShortType >( options()
+		final Img< UnsignedShortType > img = new DiskCachedCellImgFactory<>( new UnsignedShortType(), options()
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 ) )
-						.create( dimensions, new UnsignedShortType(), loader );
+						.create( dimensions, loader );
 
 		final Bdv bdv = BdvFunctions.show( img, "Cached" );
 		bdv.getBdvHandle().getViewerPanel().setDisplayMode( SINGLE );
 
 		final GaussLoader loader2 = new GaussLoader( Views.extendBorder( img ) );
-		final Img< UnsignedShortType > img2 = new DiskCachedCellImgFactory< UnsignedShortType >( options()
+		final Img< UnsignedShortType > img2 = new DiskCachedCellImgFactory<>( new UnsignedShortType(), options()
 				.cellDimensions( cellDimensions )
 				.cacheType( CacheType.BOUNDED )
 				.maxCacheSize( 100 )
 				.initializeCellsAsDirty( true ) )
-						.create( dimensions, new UnsignedShortType(), loader2 );
+						.create( dimensions, loader2 );
 
 		BdvFunctions.show( img2, "Gauss", BdvOptions.options().addTo( bdv ) );
 	}
