@@ -1,23 +1,20 @@
 package net.imglib2.cache.exampleclassifier;
 
-import static bdv.viewer.DisplayMode.SINGLE;
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
+import bdv.cache.SharedQueue;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
-import bdv.util.volatiles.SharedQueue;
+import bdv.util.BdvSource;
 import bdv.util.volatiles.VolatileViews;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.cache.img.SingleCellArrayImg;
+import net.imglib2.cache.img.optional.CacheOptions.CacheType;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.RealType;
@@ -25,6 +22,9 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.Views;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
+
+import static bdv.viewer.DisplayMode.SINGLE;
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class ExampleClassifyingCell
 {
@@ -103,7 +103,7 @@ public class ExampleClassifyingCell
 				options().initializeCellsAsDirty( true ) );
 
 		final SharedQueue queue = new SharedQueue( 7 );
-		BdvFunctions.show( VolatileViews.wrapAsVolatile( prediction, queue ), "Prediction", BdvOptions.options().addTo( bdv ) );
-		bdv.getBdvHandle().getSetupAssignments().getMinMaxGroups().get( 1 ).setRange( 0, 1 );
+		final BdvSource bdvSourcePrediction = BdvFunctions.show( VolatileViews.wrapAsVolatile( prediction, queue ), "Prediction", BdvOptions.options().addTo( bdv ) );
+		bdvSourcePrediction.setDisplayRange( 0, 1 );
 	}
 }

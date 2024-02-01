@@ -1,20 +1,14 @@
 package net.imglib2.cache.lowlevel.example06;
 
-import static bdv.viewer.DisplayMode.SINGLE;
-import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
-import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
-import static net.imglib2.type.PrimitiveType.SHORT;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-
 import bdv.img.cache.CreateInvalidVolatileCell;
 import bdv.img.cache.VolatileCachedCellImg;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.cache.Cache;
@@ -49,6 +43,11 @@ import net.imglib2.util.Pair;
 import net.imglib2.util.Util;
 import net.imglib2.util.ValuePair;
 import net.imglib2.view.Views;
+
+import static bdv.viewer.DisplayMode.SINGLE;
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+import static net.imglib2.type.PrimitiveType.SHORT;
 
 public class Example06
 {
@@ -117,7 +116,7 @@ public class Example06
 
 			final double[] s = new double[ n ];
 			Arrays.fill( s, sigma );
-			Gauss3.gauss( s, source, Views.translate( img, cellMin ), 1 );
+			Gauss3.gauss( s, source, Views.translate( img, cellMin ) );
 
 			return new Cell<>( cellDims, cellMin, array );
 		}
@@ -137,8 +136,8 @@ public class Example06
 				new GaussLoader( grid, source, sigma ),
 				AccessIo.get( SHORT, AccessFlags.setOf( VOLATILE ) ),
 				type.getEntitiesPerPixel() );
-		final IoSync< Long, Cell< VolatileShortArray > > iosync = new IoSync<>( diskcache );
-		final Cache< Long, Cell< VolatileShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< VolatileShortArray > >( 1000 )
+		final IoSync< Long, Cell< VolatileShortArray >, VolatileShortArray > iosync = new IoSync<>( diskcache );
+		final Cache< Long, Cell< VolatileShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< VolatileShortArray >, VolatileShortArray >( 1000 )
 				.withRemover( iosync )
 				.withLoader( iosync );
 		final Img< UnsignedShortType > gauss = new LazyCellImg<>( grid, type, cache.unchecked()::get );
@@ -207,8 +206,8 @@ public class Example06
 				new DiffLoader( grid, source1, source2 ),
 				AccessIo.get( SHORT, AccessFlags.setOf( VOLATILE ) ),
 				type.getEntitiesPerPixel() );
-		final IoSync< Long, Cell< VolatileShortArray > > iosync = new IoSync<>( diskcache );
-		final Cache< Long, Cell< VolatileShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< VolatileShortArray > >( 1000 )
+		final IoSync< Long, Cell< VolatileShortArray >, VolatileShortArray > iosync = new IoSync<>( diskcache );
+		final Cache< Long, Cell< VolatileShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< VolatileShortArray >, VolatileShortArray >( 1000 )
 				.withRemover( iosync )
 				.withLoader( iosync );
 		final Img< ShortType > gauss = new LazyCellImg<>( grid, type, cache.unchecked()::get );
@@ -240,8 +239,8 @@ public class Example06
 				new CheckerboardLoader( grid ),
 				AccessIo.get( SHORT, AccessFlags.setOf( DIRTY ) ),
 				type.getEntitiesPerPixel() );
-		final IoSync< Long, Cell< DirtyShortArray > > iosync = new IoSync<>( diskcache );
-		final UncheckedCache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 1000 )
+		final IoSync< Long, Cell< DirtyShortArray >, DirtyShortArray > iosync = new IoSync<>( diskcache );
+		final UncheckedCache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray >, DirtyShortArray >( 1000 )
 				.withRemover( iosync )
 				.withLoader( iosync )
 				.unchecked();
@@ -255,7 +254,7 @@ public class Example06
 
 		final int maxNumLevels = 1;
 		final int numFetcherThreads = 7;
-		final BlockingFetchQueues< Callable< ? > > queue = new BlockingFetchQueues<>( maxNumLevels );
+		final BlockingFetchQueues< Callable< ? > > queue = new BlockingFetchQueues<>( maxNumLevels, numFetcherThreads );
 		new FetcherThreads( queue, numFetcherThreads );
 
 		final Pair< Img< UnsignedShortType >, Img< VolatileUnsignedShortType > > gauss1 = createGauss( Views.extendBorder( img ), 5, grid, queue );

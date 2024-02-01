@@ -1,14 +1,9 @@
 package net.imglib2.cache.example01;
 
-import java.io.IOException;
-
-import org.scijava.ui.behaviour.DragBehaviour;
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Behaviours;
-
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.viewer.ViewerPanel;
+import java.io.IOException;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealPositionable;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
@@ -19,6 +14,9 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.transform.Round;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.view.Views;
+import org.scijava.ui.behaviour.DragBehaviour;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Behaviours;
 
 public class Example01
 {

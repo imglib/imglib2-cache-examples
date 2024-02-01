@@ -5,11 +5,9 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.LongFunction;
-
-import org.apache.commons.io.IOUtils;
-
 import net.imglib2.Interval;
 import net.imglib2.util.Intervals;
+import org.apache.commons.io.IOUtils;
 
 public class HTTPLoader< A > implements Function< Interval, A >
 {

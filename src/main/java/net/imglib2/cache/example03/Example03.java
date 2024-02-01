@@ -1,14 +1,10 @@
 package net.imglib2.cache.example03;
 
-import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
-import static net.imglib2.type.PrimitiveType.SHORT;
-
+import bdv.util.Bdv;
+import bdv.util.BdvFunctions;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-
-import bdv.util.Bdv;
-import bdv.util.BdvFunctions;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
@@ -27,6 +23,9 @@ import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Fraction;
+
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.type.PrimitiveType.SHORT;
 
 public class Example03
 {
@@ -80,8 +79,8 @@ public class Example03
 				cacheLoader,
 				AccessIo.get( SHORT, AccessFlags.setOf( DIRTY ) ),
 				entitiesPerPixel );
-		final IoSync< Long, Cell< DirtyShortArray > > iosync = new IoSync<>( diskcache );
-		final Cache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 100 )
+		final IoSync< Long, Cell< DirtyShortArray >, DirtyShortArray > iosync = new IoSync<>( diskcache );
+		final Cache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray >, DirtyShortArray >( 100 )
 				.withRemover( iosync )
 				.withLoader( iosync );
 		final Img< UnsignedShortType > img = new CachedCellImg<>( grid, type, cache, new DirtyShortArray( 0 ) );

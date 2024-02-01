@@ -2,7 +2,6 @@ package net.imglib2.cache.exampleclassifier;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
@@ -64,7 +63,7 @@ public class InstanceView< R extends RealType< R > > extends AbstractConvertedRa
 		@Override
 		public InstanceAccess< R > copy()
 		{
-			return new InstanceAccess<>( source.copyRandomAccess(), attributes );
+			return new InstanceAccess<>( source.copy(), attributes );
 		}
 
 	}
