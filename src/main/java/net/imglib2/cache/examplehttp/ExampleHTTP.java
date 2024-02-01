@@ -1,19 +1,15 @@
 package net.imglib2.cache.examplehttp;
 
-import static bdv.viewer.DisplayMode.SINGLE;
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
+import bdv.cache.SharedQueue;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.BdvSource;
-import bdv.util.volatiles.SharedQueue;
 import bdv.util.volatiles.VolatileViews;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessible;
@@ -21,8 +17,8 @@ import net.imglib2.algorithm.gradient.PartialDerivative;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.cache.img.SingleCellArrayImg;
+import net.imglib2.cache.img.optional.CacheOptions.CacheType;
 import net.imglib2.cache.util.IntervalKeyLoaderAsLongKeyLoader;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealFloatConverter;
@@ -34,6 +30,9 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+
+import static bdv.viewer.DisplayMode.SINGLE;
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class ExampleHTTP
 {

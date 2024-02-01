@@ -1,24 +1,23 @@
 package net.imglib2.cache.exampleOps;
 
-import static bdv.viewer.DisplayMode.SINGLE;
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
-
-import java.io.IOException;
-
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import bdv.util.volatiles.VolatileViews;
+import java.io.IOException;
 import net.imagej.ImageJ;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.cache.img.SingleCellArrayImg;
+import net.imglib2.cache.img.optional.CacheOptions.CacheType;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+
+import static bdv.viewer.DisplayMode.SINGLE;
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class ExampleOps
 {

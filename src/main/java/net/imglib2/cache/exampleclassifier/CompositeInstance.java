@@ -1,7 +1,6 @@
 package net.imglib2.cache.exampleclassifier;
 
 import java.util.Enumeration;
-
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.composite.RealComposite;
 import weka.core.Attribute;

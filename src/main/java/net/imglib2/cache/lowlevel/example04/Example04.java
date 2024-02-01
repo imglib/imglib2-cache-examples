@@ -1,16 +1,11 @@
 package net.imglib2.cache.lowlevel.example04;
 
-import static bdv.viewer.DisplayMode.SINGLE;
-import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
-import static net.imglib2.type.PrimitiveType.SHORT;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
 import net.imglib2.RandomAccessible;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.cache.CacheLoader;
@@ -33,6 +28,10 @@ import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
+
+import static bdv.viewer.DisplayMode.SINGLE;
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.type.PrimitiveType.SHORT;
 
 public class Example04
 {
@@ -118,8 +117,8 @@ public class Example04
 				new CheckerboardLoader( grid ),
 				AccessIo.get( SHORT, AccessFlags.setOf( DIRTY ) ),
 				entitiesPerPixel );
-		final IoSync< Long, Cell< DirtyShortArray > > iosync = new IoSync<>( diskcache );
-		final UncheckedCache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray > >( 100 )
+		final IoSync< Long, Cell< DirtyShortArray >, DirtyShortArray > iosync = new IoSync<>( diskcache );
+		final UncheckedCache< Long, Cell< DirtyShortArray > > cache = new GuardedStrongRefLoaderRemoverCache< Long, Cell< DirtyShortArray >, DirtyShortArray >( 100 )
 				.withRemover( iosync )
 				.withLoader( iosync )
 				.unchecked();
@@ -135,8 +134,8 @@ public class Example04
 				new GaussLoader( grid, Views.extendBorder( img ) ),
 				AccessIo.get( SHORT, AccessFlags.setOf() ),
 				entitiesPerPixel );
-		final IoSync< Long, Cell< ShortArray > > iosync2 = new IoSync<>( diskcache2 );
-		final UncheckedCache< Long, Cell< ShortArray > > cache2 = new GuardedStrongRefLoaderRemoverCache< Long, Cell< ShortArray > >( 100 )
+		final IoSync< Long, Cell< ShortArray >, ShortArray > iosync2 = new IoSync<>( diskcache2 );
+		final UncheckedCache< Long, Cell< ShortArray > > cache2 = new GuardedStrongRefLoaderRemoverCache< Long, Cell< ShortArray >, ShortArray >( 100 )
 				.withRemover( iosync2 )
 				.withLoader( iosync2 )
 				.unchecked();

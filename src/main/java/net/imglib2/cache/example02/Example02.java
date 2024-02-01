@@ -1,16 +1,9 @@
 package net.imglib2.cache.example02;
 
-import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
-
-import java.io.IOException;
-
-import org.scijava.ui.behaviour.DragBehaviour;
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Behaviours;
-
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.viewer.ViewerPanel;
+import java.io.IOException;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealPositionable;
 import net.imglib2.algorithm.neighborhood.HyperSphereShape;
@@ -18,13 +11,18 @@ import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
 import net.imglib2.cache.img.DiskCachedCellImgOptions;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
+import net.imglib2.cache.img.optional.CacheOptions.CacheType;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.position.transform.Round;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.view.Views;
+import org.scijava.ui.behaviour.DragBehaviour;
+import org.scijava.ui.behaviour.io.InputTriggerConfig;
+import org.scijava.ui.behaviour.util.Behaviours;
+
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.options;
 
 public class Example02
 {
