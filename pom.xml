@@ -95,6 +95,12 @@ Aivar Grislis, Jonathan Hale, Grant Harris, Stefan Helfrich, Mark Hiner,
 Martin Horn, Steffen Jaensch, Lee Kamentsky, Larry Lindsey, Melissa Linkert,
 Mark Longair, Brian Northan, Nick Perry, Curtis Rueden, Johannes Schindelin,
 Jean-Yves Tinevez and Michael Zinsmaier.</license.copyrightOwners>
+
+		<imglib2.version>6.3.1-SNAPSHOT</imglib2.version>
+		<imglib2-realtransform.version>4.0.3-SNAPSHOT</imglib2-realtransform.version>
+		<imglib2-cache.version>1.0.0-beta-18-SNAPSHOT</imglib2-cache.version>
+		<imglib2-ij.version>2.0.2-SNAPSHOT</imglib2-ij.version>
+		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
 	<dependencies>
