@@ -14,7 +14,6 @@ import weka.core.Instance;
 
 public class InstanceView< R extends RealType< R > > extends AbstractConvertedRandomAccessible< RealComposite< R >, Instance >
 {
-
 	final RandomAccessibleInterval< RealComposite< R > > source;
 
 	private final Attribute[] attributes;
@@ -38,13 +37,17 @@ public class InstanceView< R extends RealType< R > > extends AbstractConvertedRa
 		return randomAccess();
 	}
 
+	@Override
+	public Instance getType()
+	{
+		return randomAccess().getType();
+	}
+
 	public static class InstanceAccess< R extends RealType< R > > extends AbstractConvertedRandomAccess< RealComposite< R >, Instance >
 	{
-
 		private final CompositeInstance< R > instance;
 
 		private final Attribute[] attributes;
-
 
 		public InstanceAccess( final RandomAccess< RealComposite< R > > source, final Attribute[] attributes )
 		{
@@ -61,11 +64,16 @@ public class InstanceView< R extends RealType< R > > extends AbstractConvertedRa
 		}
 
 		@Override
+		public Instance getType()
+		{
+			return instance;
+		}
+
+		@Override
 		public InstanceAccess< R > copy()
 		{
 			return new InstanceAccess<>( source.copy(), attributes );
 		}
-
 	}
 
 	// length of array is nFeatures + 1 ( for class attribute )
@@ -78,6 +86,4 @@ public class InstanceView< R extends RealType< R > > extends AbstractConvertedRa
 		attributes[ nFeatures ] = new Attribute( "class", IntStream.range( 0, nClasses ).mapToObj( i -> "" + i ).collect( Collectors.toList() ) );
 		return attributes;
 	}
-
-
 }
